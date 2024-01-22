@@ -18,14 +18,18 @@
 <body>
     <div id="map"></div>
     <script>
-        const map = L.map('map').setView([39.75083976614613, -104.99196499444764], 16);
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        const map = L.map('map').setView([40.07769949211596, -104.80568661655633], 6);
+        /*L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);*/
+        L.tileLayer('http://localhost:3000/raster-tiles/{z}/{x}/{y}.png', {
+            maxZoom: 6,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
-        const vectorTiles = L.vectorGrid.protobuf("http://localhost:3000/tiles/{z}/{x}/{y}.pbf", {
+        const vectorTiles = L.vectorGrid.protobuf("http://localhost:3000/raster-tiles/{z}/{x}/{y}.png", {
             vectorTileLayerStyles: {
-                denver_parcels: {
+                buowl_habitat: {
                     weight: 1,
                     fillColor: '#9bc2c4',
                     fillOpacity: 0.5,
@@ -34,11 +38,11 @@
                     color: '#000000'
                 }
             },
-            minZoom: 16,
+            minZoom: 14,
             maxZoom: 19,
             interactive: true,
             getFeatureId: function(f) {
-                return f.properties.PARCEL_LID;
+                return f.properties.habitat_id;
             }
         })
         .addTo(map);
@@ -49,13 +53,13 @@
             if (selectedFeatureId) {
                 vectorTiles.resetFeatureStyle(selectedFeatureId);
             }
-            selectedFeatureId = e.layer.properties.PARCEL_LID;
+            selectedFeatureId = e.layer.properties.habitat_id.toString();
             L.popup()
-                .setContent(e.layer.properties.PARCEL_LID)
+                .setContent(selectedFeatureId)
                 .setLatLng(e.latlng)
                 .openOn(map)
-                
-            vectorTiles.setFeatureStyle(e.layer.properties.PARCEL_LID, {
+
+            vectorTiles.setFeatureStyle(selectedFeatureId, {
                 weight: 1,
                 fillColor: '#ff0000',
                 fillOpacity: 0.5,

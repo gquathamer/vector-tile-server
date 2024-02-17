@@ -30,11 +30,12 @@ const mercator = new SphericalMercator({
 app.get('/tiles/:z/:x/:y.pbf', async (req, res) => {
     const { z, x, y } = req.params;
     const bbox = mercator.bbox(x, y, z, false);
+    console.log(bbox);
     const SQL =
-        `SELECT ST_AsMVT(q, 'buowl_habitat', 4096, 'geom')
+        `SELECT ST_AsMVT(q, 'parcels', 4096, 'geom')
         FROM (
           SELECT
-              c."habitat_id",
+              c."PARCELNUM",
               ST_AsMVTGeom(
                   geom,
                   ST_MakeEnvelope(${bbox[0]}, ${bbox[1]}, ${bbox[2]}, ${bbox[3]}, 4326),
@@ -42,7 +43,7 @@ app.get('/tiles/:z/:x/:y.pbf', async (req, res) => {
                   256,
                   false
               ) as geom
-          FROM buowl_habitat as c
+          FROM parcels as c
             WHERE ST_Intersects(
                 ST_MakeEnvelope(${bbox[0]}, ${bbox[1]}, ${bbox[2]}, ${bbox[3]}, 4326),
             c.geom
@@ -60,32 +61,6 @@ app.get('/tiles/:z/:x/:y.pbf', async (req, res) => {
         res.status(404).send({
             error: e.toString()
         });
-    }
-})
-
-app.get('/raster-tiles/:z/:x/:y.png', async (req, res) => {
-    const { z, x, y } = req.params;
-    console.log(z, x, y);
-    try {
-        const tile = await fs.readFile(path.join(__dirname, `./natural-earth/${z}/${x}/${y}.png`));
-        res.set('Content-Type', 'image/png')
-        res.send(tile);
-    } catch (e) {
-        res.status(404).send({
-            error: e.toString()
-        })
-    }
-})
-
-app.get('/test.jpg', async (req, res) => {
-    try {
-        const tile = await fs.readFile(path.join(__dirname, `./natural-earth/download.jpg`));
-        res.set('Content-Type', 'image/jpg');
-        res.send(tile)
-    } catch (e) {
-        res.status(404).send({
-            error: e.toString()
-        })
     }
 })
 

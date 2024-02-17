@@ -1,7 +1,7 @@
 const express = require('express');
 const SphericalMercator = require('@mapbox/sphericalmercator');
 const pg = require('pg');
-const cors = require('cors');
+// const cors = require('cors');
 const fs = require('node:fs/promises');
 const path = require('node:path')
 require('dotenv').config();
@@ -16,9 +16,11 @@ const db = new pg.Client({
 
 const app = express();
 
-app.use(cors({
+/* app.use(cors({
     origin: 'http://127.0.0.1:5500'
-}))
+})) */
+
+app.use(express.static('public'));
 
 const mercator = new SphericalMercator({
     size: 256,

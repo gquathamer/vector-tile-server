@@ -1,7 +1,6 @@
 const express = require('express');
 const SphericalMercator = require('@mapbox/sphericalmercator');
 const pg = require('pg');
-// const cors = require('cors');
 const fs = require('node:fs/promises');
 const path = require('node:path')
 require('dotenv').config();
@@ -16,10 +15,6 @@ const db = new pg.Client({
 
 const app = express();
 
-/* app.use(cors({
-    origin: 'http://127.0.0.1:5500'
-})) */
-
 app.use(express.static('public'));
 
 const mercator = new SphericalMercator({
@@ -30,11 +25,10 @@ const mercator = new SphericalMercator({
 app.get('/tiles/:z/:x/:y.pbf', async (req, res) => {
     const { z, x, y } = req.params;
     const bbox = mercator.bbox(x, y, z, false);
-    console.log(bbox);
     const SQL =
         `SELECT ST_AsMVT(q, 'parcels', 4096, 'geom')
         FROM (
-          SELECT
+            SELECT
               c."PARCELNUM",
               ST_AsMVTGeom(
                   geom,
@@ -43,11 +37,11 @@ app.get('/tiles/:z/:x/:y.pbf', async (req, res) => {
                   256,
                   false
               ) as geom
-          FROM parcels as c
+            FROM parcels as c
             WHERE ST_Intersects(
                 ST_MakeEnvelope(${bbox[0]}, ${bbox[1]}, ${bbox[2]}, ${bbox[3]}, 4326),
-            c.geom
-        )
+                c.geom
+            )
         ) q
       `
     try {
